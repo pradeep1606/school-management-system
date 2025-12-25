@@ -29,7 +29,7 @@ public class SchoolServiceImpl implements SchoolService {
         }
 
 
-// Business rule: check code already exits ? (school code must be unique)
+// Business rule: check school already exits ? (school code must be unique)
         schoolRepository.findByCode(school.getCode())
                 .ifPresent(existing -> {
                     throw new IllegalArgumentException("School code already exists");
