@@ -21,7 +21,7 @@ public static User toEntity(UserCreateRequest request, School school, Role role)
     user.setSchool(school);
     user.setRole(role);
 
-    user.setPassword("TEMP@123");
+    user.setPassword(request.getPassword());
 
     user.setStatus("ACTIVE");
 
