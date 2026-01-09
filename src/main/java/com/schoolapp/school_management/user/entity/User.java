@@ -1,16 +1,13 @@
 package com.schoolapp.school_management.user.entity;
+
+import com.schoolapp.school_management.common.entity.BaseAuditEntity;
 import com.schoolapp.school_management.role.entity.Role;
 import com.schoolapp.school_management.school.entity.School;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "app_user")
-public class User {
-
+public class User extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,19 +30,10 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
 
-
     @Column(nullable = false, length = 20)
     private String status;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-//    Getter & Setter
+    // ===== Getters & Setters =====
 
     public Long getId() {
         return id;
@@ -101,13 +89,5 @@ public class User {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

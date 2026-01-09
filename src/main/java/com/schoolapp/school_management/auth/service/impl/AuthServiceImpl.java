@@ -2,6 +2,7 @@ package com.schoolapp.school_management.auth.service.impl;
 
 import com.schoolapp.school_management.auth.dto.LoginRequest;
 import com.schoolapp.school_management.auth.dto.LoginResponse;
+import com.schoolapp.school_management.security.JwtUtil;
 import com.schoolapp.school_management.user.entity.User;
 import com.schoolapp.school_management.user.repository.UserRepository;
 import com.schoolapp.school_management.auth.service.AuthService;
@@ -43,6 +44,10 @@ public class AuthServiceImpl implements AuthService {
         response.setRole(user.getRole().getName());
         response.setSchoolId(user.getSchool().getId());
         response.setStatus(user.getStatus());
+        String roleName = user.getRole().getName();
+        Long schoolId = user.getSchool().getId();
+        String token = JwtUtil.generateToken(user.getId(), user.getUserName(), roleName, schoolId);
+        response.setToken(token);
         response.setLoginTime(LocalDateTime.now());
 
         return response;

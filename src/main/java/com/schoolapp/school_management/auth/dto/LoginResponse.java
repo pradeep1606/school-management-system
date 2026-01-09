@@ -10,6 +10,7 @@ public class LoginResponse {
     private String role;
     private Long schoolId;
     private String status;
+    private String token;
     private LocalDateTime loginTime;
 
     //  getters & setters
@@ -61,6 +62,14 @@ public class LoginResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public LocalDateTime getLoginTime() {

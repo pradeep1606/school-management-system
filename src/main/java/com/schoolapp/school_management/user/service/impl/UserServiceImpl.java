@@ -4,6 +4,7 @@ import com.schoolapp.school_management.role.entity.Role;
 import com.schoolapp.school_management.role.repository.RoleRepository;
 import com.schoolapp.school_management.school.entity.School;
 import com.schoolapp.school_management.school.repository.SchoolRepository;
+import com.schoolapp.school_management.security.SecurityUtil;
 import com.schoolapp.school_management.user.dto.UserResponse;
 import com.schoolapp.school_management.user.entity.User;
 import com.schoolapp.school_management.user.mapper.UserMapper;
@@ -37,37 +38,54 @@ public class UserServiceImpl implements UserService {
 //    Create User
     @Override
     public User createUser(User request) {
-        //  Validate School
-        School school = schoolRepository.findById(request.getSchool().getId())
+
+        Long loggedInSchoolId = SecurityUtil.getCurrentSchoolId();
+
+        // 🔐 Enforce school isolation
+        if (!request.getSchool().getId().equals(loggedInSchoolId)) {
+            throw new SecurityException("You cannot create user for another school");
+        }
+
+        // Validate School (safe now)
+        School school = schoolRepository.findById(loggedInSchoolId)
                 .orElseThrow(() -> new IllegalArgumentException("School not found"));
 
-        //   Validate Role
+        // Validate Role
         Role role = roleRepository.findById(request.getRole().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
         User user = new User();
         user.setUserName(request.getUserName());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // password encrypt
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus("ACTIVE");
 
         user.setSchool(school);
         user.setRole(role);
 
         return userRepository.save(user);
-
     }
 
 
-//    Get User by Id
+    //    Get User by Id
     @Override
     public User getUserById(Long id) {
-        return userRepository.findById(id)
+
+        Long loggedInSchoolId = SecurityUtil.getCurrentSchoolId();
+
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+
+        if (!user.getSchool().getId().equals(loggedInSchoolId)) {
+            throw new SecurityException("Access denied to another school's user");
+        }
+
+        return user;
     }
 
 
-//    Get School by school id
+    //    Get School by school id
+    @Override
     public School getSchoolById(Long schoolId) {
         return schoolRepository.findById(schoolId)
                 .orElseThrow(() -> new IllegalArgumentException("School not found with id: " + schoolId));
@@ -75,6 +93,7 @@ public class UserServiceImpl implements UserService {
 
 
 //    Get role by role id
+    @Override
     public Role getRoleById(Long roleId) {
         return roleRepository.findById(roleId)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found with id: " + roleId));
@@ -85,15 +104,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserResponse> getUsersBySchool(Long schoolId, int page, int size) {
 
-        //  Validate school exists
-        schoolRepository.findById(schoolId)
-                .orElseThrow(() -> new RuntimeException("School not found"));
+        Long loggedInSchoolId = SecurityUtil.getCurrentSchoolId();
+
+        // Enforce school isolation
+        if (!loggedInSchoolId.equals(schoolId)) {
+            throw new SecurityException("Access denied to another school data");
+        }
 
         PageRequest pageable = PageRequest.of(page, size);
 
-        Page<User> usersPage = userRepository.findBySchoolId(schoolId, pageable);
+        Page<User> usersPage =
+                userRepository.findBySchoolId(loggedInSchoolId, pageable);
 
-        //  Map entity → DTO
         return usersPage.map(UserMapper::toResponse);
     }
 }
