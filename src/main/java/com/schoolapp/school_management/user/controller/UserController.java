@@ -1,6 +1,7 @@
 package com.schoolapp.school_management.user.controller;
 
 
+import com.schoolapp.school_management.common.response.ApiResponse;
 import com.schoolapp.school_management.role.entity.Role;
 import com.schoolapp.school_management.school.entity.School;
 import com.schoolapp.school_management.user.dto.UserCreateRequest;
@@ -30,7 +31,7 @@ public class UserController {
 
     // Create User
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(
             @Valid @RequestBody UserCreateRequest request) {
 
         School school = userService.getSchoolById(request.getSchoolId());
@@ -40,26 +41,26 @@ public class UserController {
         User saved = userService.createUser(user);
 
         UserResponse response = UserMapper.toResponse(saved);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success("User created successfully", response), HttpStatus.CREATED);
     }
 
 
     // Get User by ID
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         UserResponse response = UserMapper.toResponse(user);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/school/{schoolId}")
-    public ResponseEntity<Page<UserResponse>> getUsersBySchool(
+    public ResponseEntity<ApiResponse<Page<UserResponse>>> getUsersBySchool(
             @PathVariable Long schoolId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Page<UserResponse> users = userService.getUsersBySchool(schoolId, page, size);
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(ApiResponse.success(users));
     }
 
 }

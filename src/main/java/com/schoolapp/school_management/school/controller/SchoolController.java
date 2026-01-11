@@ -1,6 +1,7 @@
 package com.schoolapp.school_management.school.controller;
 
 
+import com.schoolapp.school_management.common.response.ApiResponse;
 import com.schoolapp.school_management.school.dto.SchoolCreateRequest;
 import com.schoolapp.school_management.school.dto.SchoolResponse;
 import com.schoolapp.school_management.school.entity.School;
@@ -24,30 +25,30 @@ public class SchoolController {
 
 
 // Create School
-@PostMapping
-public ResponseEntity<SchoolResponse> createSchool(
-        @Valid @RequestBody SchoolCreateRequest request) {
+    @PostMapping
+    public ResponseEntity<ApiResponse<SchoolResponse>> createSchool(
+            @Valid @RequestBody SchoolCreateRequest request) {
 
     School school = SchoolMapper.toEntity(request);
     School saved = schoolService.createSchool(school);
     SchoolResponse response = SchoolMapper.toResponse(saved);
 
-    return new ResponseEntity<>(response, HttpStatus.CREATED);
+    return new ResponseEntity<>(ApiResponse.success("School created successfully", response), HttpStatus.CREATED);
 }
 
 
 // Get School By id
     @GetMapping("/{id}")
-    public ResponseEntity<School> getSchoolById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<School>> getSchoolById(@PathVariable Long id) {
         School school = schoolService.getSchoolById(id);
-        return ResponseEntity.ok(school);
+        return ResponseEntity.ok(ApiResponse.success(school));
     }
 
 
 // Get School By school Code
     @GetMapping("/code/{code}")
-    public ResponseEntity<School> getSchoolByCode(@PathVariable String code) {
+    public ResponseEntity<ApiResponse<School>> getSchoolByCode(@PathVariable String code) {
         School school = schoolService.getSchoolByCode(code);
-        return ResponseEntity.ok(school);
+        return ResponseEntity.ok(ApiResponse.success(school));
     }
 }
